@@ -1,0 +1,200 @@
+<html>
+
+<head>
+    <title>Weather</title>
+    <link rel="icon" href="/img/weather.png">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="main-content">
+            {{>header}}
+
+            <p id="note" class="note">Input your desired location below!</p>
+
+            <div autocomplete="off" id="form">
+                <div class="autocomplete" style="width:300px;">
+                    <input autocomplete="off" id="myInput" type="text" placeholder="Location" name="locationSearch">
+                </div>
+                <button type="submit" id="country_submit_button">Search</button>
+
+                <div class="radioButtons">
+                    <label class="radioContainer">Overall Score
+                        <input id="score" type="radio" checked="checked" name="display" value="score">
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <label class="radioContainer">Heat Scores
+                        <input id="heat" type="radio" name="display" value="heat">
+                        <span class="checkmark"></span>
+                    </label>
+
+                    <label class="radioContainer">Air Quality Scores
+                        <input id="air" type="radio" name="display" value="air">
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+
+                <div id="dateDiv"></div>
+
+            </div>
+
+            <p id="average-heat-prediction">
+            </p>
+            <p id="carbon-dioxide"></p>
+            <p id="nitrogen-oxide"></p>
+        </div>
+
+        <div id="regions_div" style="width: 100%; height:500px"></div>
+        <div id="errorModalFrame" style="display: none;" class="frame">
+            <div id="errorModal" class="modal" data-modal="">
+                <img alt="Warning" class="modal__icon"
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/OOjs_UI_icon_alert_destructive.svg/480px-OOjs_UI_icon_alert_destructive.svg.png" />
+                <h6 class="modal__title">
+                    Oh no!
+                </h6>
+                <p id="errorModalText" class="modal__text"></p>
+                <button id="dismissErrorModalButton" class="modal__btn btn" data-modal-closer="">Dismiss</button>
+            </div>
+            <button id="displayErrorModalButton" class="frame__repeat btn" data-modal-repeat=""></button>
+        </div>
+        {{>footer}}
+    </div>
+    <script type="module" src="/js/client-side.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script>
+
+        // JQuery function fadeOut requires it be found in jQuery, in future
+        // just extract the fadeOut function in pure JavaScript.
+        const displayErrorModalButton = $('#displayErrorModalButton');
+        const erorrModalText = document.getElementById('errorModalText');
+        const errorModal = document.getElementById('errorModal');
+        const dismissErrorModalButton = document.getElementById('dismissErrorModalButton');
+        const errorModalFrame = document.getElementById('errorModalFrame');
+
+        function displayErrorModal(errorMessage){
+            errorModalText.innerText = errorMessage;
+            errorModalFrame.style.display = 'initial';
+            displayErrorModalButton.fadeOut();
+            errorModal.classList.remove('_hide');
+        }
+
+        dismissErrorModalButton.addEventListener('click', function(){
+            errorModal.classList.add('_hide');
+            displayErrorModalButton.fadeIn();
+            errorModalFrame.style.display = 'none';
+        })
+
+        function autocomplete(inp) {
+
+            /*the autocomplete function takes two arguments,
+            the text field element and an array of possible autocompleted values:*/
+            var currentFocus;
+
+            /*execute a function when someone writes in the text field:*/
+            inp.addEventListener("input", function (e) {
+                var a, b, val = this.value;
+
+                /*close any already open lists of autocompleted values*/
+                closeAllLists();
+                if (!val) {
+                    return false;
+                }
+
+                currentFocus = -1;
+                a = document.createElement("DIV");
+                a.setAttribute("id", this.id + "autocomplete-list");
+                a.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(a);
+
+                fetch("/countries?country=" + this.value).then((response) => {
+                    response.json().then((data) => {
+                        if (data.error) {
+                            console.error(data);
+                        } else {
+                            for (i = 0; i < data.length; i++) {
+                                b = document.createElement("DIV");
+                                b.innerHTML = "<strong>" + data[i].substr(0, val.length) +
+                                    "</strong>";
+                                b.innerHTML += data[i].substr(val.length);
+                                b.innerHTML += "<input type='hidden' value='" + data[i] + "'>";
+                                b.addEventListener("click", function (e) {
+                                    inp.value = this.getElementsByTagName("input")[0]
+                                        .value;
+                                    closeAllLists();
+                                });
+                                a.appendChild(b);
+                            }
+                        }
+                    });
+                });
+            });
+            /*execute a function presses a key on the keyboard:*/
+            inp.addEventListener("keydown", function (e) {
+                var x = document.getElementById(this.id + "autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    /*If the arrow DOWN key is pressed,
+                    increase the currentFocus variable:*/
+                    currentFocus++;
+                    /*and and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 38) { //up
+                    /*If the arrow UP key is pressed,
+                    decrease the currentFocus variable:*/
+                    currentFocus--;
+                    /*and and make the current item more visible:*/
+                    addActive(x);
+                } else if (e.keyCode == 13) {
+                    /*If the ENTER key is pressed, prevent the form from being submitted,*/
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        /*and simulate a click on the "active" item:*/
+                        if (x) x[currentFocus].click();
+                    }
+                }
+            });
+
+            function addActive(x) {
+                /*a function to classify an item as "active":*/
+                if (!x) return false;
+                /*start by removing the "active" class on all items:*/
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                /*add class "autocomplete-active":*/
+                x[currentFocus].classList.add("autocomplete-active");
+            }
+
+            function removeActive(x) {
+                /*a function to remove the "active" class from all autocomplete items:*/
+                for (var i = 0; i < x.length; i++) {
+                    x[i].classList.remove("autocomplete-active");
+                }
+            }
+
+            function closeAllLists(elmnt) {
+                /*close all autocomplete lists in the document,
+                except the one passed as an argument:*/
+                var x = document.getElementsByClassName("autocomplete-items");
+                for (var i = 0; i < x.length; i++) {
+                    if (elmnt != x[i] && elmnt != inp) {
+                        x[i].parentNode.removeChild(x[i]);
+                    }
+                }
+            }
+            /*execute a function when someone clicks in the document:*/
+            document.addEventListener("click", function (e) {
+                closeAllLists(e.target);
+            });
+        }
+
+        /*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
+        autocomplete(document.getElementById("myInput"));
+    </script>
+
+</body>
+
+</html>

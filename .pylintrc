@@ -1,0 +1,20 @@
+[MASTER]
+
+ignore-patterns=globals.py
+
+[LOGGING]
+
+# Format style used to check logging format string. `old` means using %
+# formatting, `new` is for `{}` formatting,and `fstr` is for f-strings.
+logging-format-style=new
+
+[MESSAGES CONTROL]
+
+# E0401 : Unable to find import
+# C0303 : Line too long (RATIO)
+# W1203 : f"" string
+# R0913 : Too many arguments, nothing I can do about this. Schemas have large
+#  number of arguments.
+# R0201 : Method could be a function, incorrectly marking private method as
+#  public.
+disable=E0401,C0303,W1203,R0913,R0201

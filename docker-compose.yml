@@ -1,0 +1,78 @@
+version: "3.3"
+services:
+  db:
+    image: postgres:14.2-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PRODUCER_USER=producer
+      - PRODUCER_PASS=producer
+      - CONSUMER_USER=consumer
+      - CONSUMER_PASS=consumer
+      - DB_NAME=models
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+  frontend:
+    build:
+      context: ./src
+      dockerfile: Dockerfile.frontend
+    image: frontend
+    ports:
+      - 3000:3000
+
+  aggregator:
+    build:
+      context: ./src
+      dockerfile: Dockerfile.aggregator
+    image: aggregator
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    volumes:
+      - ./logs:/logs
+
+  heat:
+    build:
+      context: ./src
+      dockerfile: Dockerfile.heat
+    image: heat
+    environment:
+    - DATASETS_PATH=${HEAT_DATASETS_PATH}
+    - HOST=${HEAT_HOST}
+    - DATABASE=${HEAT_DATABASE}
+    - USERNAME=${HEAT_USERNAME}
+    - PASSWORD=${HEAT_PASSWORD}
+    - MAX_RETRY_COUNT=${HEAT_MAX_RETRY_COUNT}
+    - RETRY_SLEEP_COUNT=${HEAT_RETRY_SLEEP_COUNT}
+    - PRODUCTION=TRUE
+    depends_on:
+      - db
+    volumes:
+      - ./datasets:/datasets
+      - ./logs:/logs
+
+  air:
+    build:
+      context: ./src
+      dockerfile: Dockerfile.air
+    image: air
+    environment:
+    - DATASETS_PATH=${AIR_DATASETS_PATH}
+    - HOST=${AIR_HOST}
+    - DATABASE=${AIR_DATABASE}
+    - USERNAME=${AIR_USERNAME}
+    - PASSWORD=${AIR_PASSWORD}
+    - MAX_RETRY_COUNT=${AIR_MAX_RETRY_COUNT}
+    - RETRY_SLEEP_COUNT=${AIR_RETRY_SLEEP_COUNT}
+    - PRODUCTION=TRUE
+    depends_on:
+      - db
+    volumes:
+      - ./datasets:/datasets
+      - ./logs:/logs
