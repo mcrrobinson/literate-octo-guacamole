@@ -1,4 +1,6 @@
-import { countries } from "/js/countries.js";
+import {
+  countries
+} from "/js/countries.js";
 
 var today = new Date();
 var dd = String(today.getDate()).padStart(2, "0");
@@ -28,7 +30,9 @@ function drawRegionsMap(countries_and_values, focus_country) {
   if (focus_country === "world") {
     console.log("Mapping dictionary to 2d array...");
     data = google.visualization.arrayToDataTable(
-      [["Country", "Score"]].concat(map_to_2d_array(countries_and_values))
+      [
+        ["Country", "Score"]
+      ].concat(map_to_2d_array(countries_and_values))
     );
   } else {
     console.log("Drawing region country...", focus_country);
@@ -76,16 +80,16 @@ submit_button.addEventListener("click", function () {
   var day = dateObject.getUTCDate();
   var year = dateObject.getUTCFullYear();
 
-  fetch("/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      locationSearch: country_request,
-      inputDate: dateObject.toISOString().slice(0, 19).replace("T", " "),
-    }),
-  })
+  fetch("/live/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        locationSearch: country_request,
+        inputDate: dateObject.toISOString().slice(0, 19).replace("T", " "),
+      }),
+    })
     .then((res) => {
       return res.json();
     })
@@ -93,14 +97,14 @@ submit_button.addEventListener("click", function () {
 
   if (getSelectedValue.value == "heat") {
     fetch(
-      "/heat_prediction?year=" +
-        year +
-        "&month=" +
-        month +
-        "&day=" +
-        day +
-        "&country=" +
-        countryCodeLocation
+      "/live/heat_prediction?year=" +
+      year +
+      "&month=" +
+      month +
+      "&day=" +
+      day +
+      "&country=" +
+      countryCodeLocation
     ).then((response) => {
       response.json().then((data) => {
         if (data.error) {
@@ -118,14 +122,14 @@ submit_button.addEventListener("click", function () {
     });
   } else if (getSelectedValue.value == "air") {
     fetch(
-      "/air_pollution_prediction?year=" +
-        year +
-        "&month=" +
-        month +
-        "&day=" +
-        day +
-        "&country=" +
-        countryCodeLocation
+      "/live/air_pollution_prediction?year=" +
+      year +
+      "&month=" +
+      month +
+      "&day=" +
+      day +
+      "&country=" +
+      countryCodeLocation
     ).then((response) => {
       response.json().then((data) => {
         if (data.error) {
@@ -143,14 +147,14 @@ submit_button.addEventListener("click", function () {
     });
   } else if (getSelectedValue.value == "score") {
     fetch(
-      "/score?year=" +
-        year +
-        "&month=" +
-        month +
-        "&day=" +
-        day +
-        "&country=" +
-        countryCodeLocation
+      "/live/score?year=" +
+      year +
+      "&month=" +
+      month +
+      "&day=" +
+      day +
+      "&country=" +
+      countryCodeLocation
     ).then((response) => {
       response.json().then((data) => {
         if (data.error) {

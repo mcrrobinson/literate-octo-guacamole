@@ -109,7 +109,7 @@
                 a.setAttribute("class", "autocomplete-items");
                 this.parentNode.appendChild(a);
 
-                fetch("/countries?country=" + this.value).then((response) => {
+                fetch("/live/countries?country=" + this.value).then((response) => {
                     response.json().then((data) => {
                         if (data.error) {
                             console.error(data);

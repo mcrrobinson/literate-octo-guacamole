@@ -52,14 +52,14 @@ hbs.registerPartials(partialsPath);
 app.use(express.static(publicDirectoryPath));
 
 
-app.get("/", (req, res) => {
+app.get("/live", (req, res) => {
   res.render("index", {
     title: "Live Long App",
     name: "TEAM 31 SETAP",
   });
 });
 
-app.post("/messages", async (req, res) => {
+app.post("/live/messages", async (req, res) => {
   const db = await dbPromise;
   const messageText = req.body.locationSearch;
   const inputTime = req.body.inputDate;
@@ -73,7 +73,7 @@ app.post("/messages", async (req, res) => {
   });
 });
 
-app.get("/countries", async (req, res) => {
+app.get("/live/countries", async (req, res) => {
   const messageText = req.query.country.toUpperCase();
   var return_results = [];
   Object.keys(countries).forEach((element) => {
@@ -84,7 +84,7 @@ app.get("/countries", async (req, res) => {
   res.json(return_results);
 });
 
-app.get("/heat_prediction", async (req, res) => {
+app.get("/live/heat_prediction", async (req, res) => {
   if (!req.query.hasOwnProperty("country")) {
     return res.json({
       error: "country was undefined"
@@ -106,7 +106,7 @@ app.get("/heat_prediction", async (req, res) => {
   });
 });
 
-app.get("/air_pollution_prediction", async (req, res) => {
+app.get("/live/air_pollution_prediction", async (req, res) => {
   if (!req.query.hasOwnProperty("country")) {
     return res.json({
       error: "country was undefined"
@@ -128,14 +128,14 @@ app.get("/air_pollution_prediction", async (req, res) => {
   });
 });
 
-app.get("/about", (req, res) => {
+app.get("/live/about", (req, res) => {
   res.render("about", {
     title: "About Us",
     name: "TEAM 31 SETAP",
   });
 });
 
-app.get("/score", async (req, res) => {
+app.get("/live/score", async (req, res) => {
   if (!req.query.hasOwnProperty("country")) {
     res.json({
       error: "country was undefined"
@@ -157,15 +157,7 @@ app.get("/score", async (req, res) => {
   });
 });
 
-app.get("/help/*", (req, res) => {
-  res.render("404", {
-    title: "404",
-    name: "TEAM 31 SETAP",
-    errorMessage: "Help article not found.",
-  });
-});
-
-app.get("*", (req, res) => {
+app.get("/live/*", (req, res) => {
   res.render("404", {
     title: "404",
     name: "TEAM 31 SETAP",
