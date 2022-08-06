@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlalchemy
 from sqlalchemy.orm import Session, sessionmaker
 import databases
-from env import COUNTRIES, DATABASE_URL
+from models.env import COUNTRIES, DATABASE_URL
 from models.schemas import AirSchema, HeatSchema
 
 try:

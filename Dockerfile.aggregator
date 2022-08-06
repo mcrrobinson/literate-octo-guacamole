@@ -1,7 +1,23 @@
-FROM me/builder AS builder
-FROM python:3.8-slim
+FROM python:3.8-slim 
+
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends build-essential gcc libpq-dev
-COPY --from=builder /opt/venv /opt/venv
-
+RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+RUN pip install wheel
+
+COPY setup.py .
+COPY setup.cfg .
+
+COPY ./aggregator/ ./aggregator
+COPY ./models/ ./models
+COPY ./tests/ ./tests
+
+RUN python setup.py install
+RUN pip install .
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends build-essential gcc libpq-dev

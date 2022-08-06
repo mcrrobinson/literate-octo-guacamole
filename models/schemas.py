@@ -2,7 +2,7 @@ import math
 import sqlalchemy
 
 from sqlalchemy.ext.declarative import declarative_base
-from maths import predict
+from models.maths import predict
 
 Base = declarative_base()
 CARBON_DIOXIDE_MAX_CONST = 444.7619
