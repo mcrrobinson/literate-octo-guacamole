@@ -91,7 +91,7 @@ app.get("/heat_prediction", async (req, res) => {
     });
   }
 
-  http.get('http://aggregator:8000/heat_prediction?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
+  http.get('http://livelong_api:8080/heat_prediction?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
     let data = '';
 
     // A chunk of data has been received.
@@ -113,7 +113,7 @@ app.get("/air_pollution_prediction", async (req, res) => {
     });
   }
 
-  http.get('http://aggregator:8000/air_pollution_prediction?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
+  http.get('http://livelong_api:8080/air_pollution_prediction?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
     let data = '';
 
     // A chunk of data has been received.
@@ -142,7 +142,7 @@ app.get("/score", async (req, res) => {
     });
   }
 
-  http.get('http://aggregator:8000/score?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
+  http.get('http://livelong_api:8080/score?year=' + req.query.year + '&month=' + req.query.month + '&day=' + req.query.day + '&country=' + req.query.country, (resp) => {
     let data = '';
 
     // A chunk of data has been received.
@@ -176,8 +176,8 @@ app.get("*", (req, res) => {
 const setup = async () => {
   const db = await dbPromise;
   await db.migrate();
-  app.listen("3000", () => {
-    console.log("Server is up on port 3000.");
+  app.listen("8081", () => {
+    console.log("Server is up on port 8081.");
   });
 };
 

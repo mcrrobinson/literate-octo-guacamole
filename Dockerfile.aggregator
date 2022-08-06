@@ -5,6 +5,3 @@ RUN apt-get install -y --no-install-recommends build-essential gcc libpq-dev
 COPY --from=builder /opt/venv /opt/venv
 
 ENV PATH="/opt/venv/bin:$PATH"
-EXPOSE 8000
-
-CMD ["uvicorn", "aggregator.main:app", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000"]
