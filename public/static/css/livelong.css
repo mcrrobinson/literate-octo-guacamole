@@ -1,69 +1,3 @@
-body {
-  color: #333333;
-  font-family: arial;
-  max-width: 650px;
-  margin: 0 auto;
-  padding: 0 16px;
-
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex-grow: 1;
-}
-
-a:hover {
-  background-color: #e7e7e7;
-}
-
-footer {
-  color: #888888;
-  border-top: 1px solid #eeeeee;
-  margin-top: 16px;
-  padding: 16px 0;
-}
-
-header {
-  margin-top: 16px;
-  margin-bottom: 48px;
-}
-
-h1 {
-  font-size: 64px;
-  margin-bottom: 16px;
-}
-
-header a {
-  color: #888888;
-  margin-right: 16px;
-  text-decoration: none;
-}
-
-.portrait {
-  width: 250px;
-}
-
-header a {
-  color: #888888;
-  margin-right: 16px;
-  text-decoration: none;
-}
-
-input {
-  border: 1px solid #cccccc;
-  padding: 8px;
-}
-
-button {
-  cursor: pointer;
-  border: 1px solid #888888;
-  background: #888888;
-  color: white;
-  padding: 8px;
-}
-
 .flexbox-container {
   display: flex;
 }
@@ -108,7 +42,7 @@ header {
 }
 
 h1 {
-  font-size: 64px;
+  font-size: 42px;
   margin-bottom: 16px;
 }
 
@@ -149,10 +83,10 @@ button {
 
 input,
 button {
-    border: 1px solid transparent;
-    background-color: #f1f1f1;
-    padding: 10px;
-    font-size: 16px;
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
 }
 
 input[type="text"] {
@@ -192,79 +126,80 @@ button[type="submit"] {
 
 /*when navigating through the items using the arrow keys:*/
 .autocomplete-active {
-    background-color: DodgerBlue !important;
-    color: #ffffff;
+  background-color: DodgerBlue !important;
+  color: #ffffff;
 }
 
 .radioButtons {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 /* The container */
 .radioContainer {
-    display: block;
-    position: relative;
-    padding-left: 35px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    font-size: 22px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Hide the browser's default radio button */
 .radioContainer input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* Create a custom radio button */
 .checkmark {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 25px;
-    width: 25px;
-    background-color: #eee;
-    border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 50%;
 }
 
 /* On mouse-over, add a grey background color */
 .radioContainer:hover input~.checkmark {
-    background-color: #ccc;
+  background-color: #ccc;
 }
 
 /* When the radio button is checked, add a blue background */
 .radioContainer input:checked~.checkmark {
-    background-color: #2196F3;
+  background-color: #2196F3;
 }
 
 /* Create the indicator (the dot/circle - hidden when not checked) */
 .checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
+  content: "";
+  position: absolute;
+  display: none;
 }
 
 /* Show the indicator (dot/circle) when checked */
 .radioContainer input:checked~.checkmark:after {
-    display: block;
+  display: block;
 }
 
 /* Style the indicator (dot/circle) */
 .radioContainer .checkmark:after {
-    top: 9px;
-    left: 9px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: white;
+  top: 9px;
+  left: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
 }
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:700,600,300);
+
 .btn {
   cursor: pointer;
   height: 40px;
@@ -289,6 +224,7 @@ button[type="submit"] {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
 .frame__repeat {
   position: absolute;
   display: none;
@@ -296,15 +232,18 @@ button[type="submit"] {
   right: 10px;
   fill: rgba(255, 255, 255, 0.75);
 }
+
 .frame__repeat svg {
   fill: inherit;
   width: 20px;
   height: 20px;
   transition: transform 0.3s ease-in-out;
 }
+
 .frame__repeat:hover {
   fill: white;
 }
+
 .frame__repeat:hover svg {
   transform: rotate(180deg);
   transition: transform 0.6s ease-in-out;
@@ -323,34 +262,40 @@ button[type="submit"] {
   box-shadow: 4px 8px 16px 0 rgba(0, 0, 0, 0.4);
   text-align: center;
   -webkit-animation: show-modal 0.6s ease-in-out both;
-          animation: show-modal 0.6s ease-in-out both;
+  animation: show-modal 0.6s ease-in-out both;
   will-change: transform;
 }
+
 .modal__icon {
   width: 44px;
   margin-bottom: 15px;
 }
+
 .modal__title {
   margin: 0 0 8px;
   padding: 0 10px;
   font-size: 18px;
   font-weight: 600;
 }
+
 .modal__text {
   padding: 0 30px;
   margin: 0 0 25px;
   font-size: 14px;
 }
+
 .modal__btn {
   width: 100%;
   background-color: #f65656;
 }
+
 .modal__btn:hover {
   background-color: #ec3434;
 }
+
 .modal._hide {
   -webkit-animation-name: hide-modal;
-          animation-name: hide-modal;
+  animation-name: hide-modal;
 }
 
 @-webkit-keyframes show-modal {
@@ -358,13 +303,16 @@ button[type="submit"] {
     transform: scale(0);
     opacity: 0;
   }
+
   60% {
     transform: scale(1.15);
     opacity: 1;
   }
+
   80% {
     transform: scale(0.85);
   }
+
   100% {
     transform: scale(1);
   }
@@ -375,38 +323,47 @@ button[type="submit"] {
     transform: scale(0);
     opacity: 0;
   }
+
   60% {
     transform: scale(1.15);
     opacity: 1;
   }
+
   80% {
     transform: scale(0.85);
   }
+
   100% {
     transform: scale(1);
   }
 }
+
 @-webkit-keyframes hide-modal {
   0% {
     transform: scale(1);
   }
+
   20% {
     transform: scale(1.15);
     opacity: 1;
   }
+
   100% {
     transform: scale(0);
     opacity: 0;
   }
 }
+
 @keyframes hide-modal {
   0% {
     transform: scale(1);
   }
+
   20% {
     transform: scale(1.15);
     opacity: 1;
   }
+
   100% {
     transform: scale(0);
     opacity: 0;

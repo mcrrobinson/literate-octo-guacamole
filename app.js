@@ -14,7 +14,7 @@ import {
 import * as http from "http";
 import {
   countries
-} from "./public/js/countries.js";
+} from "./public/static/js/countries.js";
 import {
   createRequire
 } from "module";
