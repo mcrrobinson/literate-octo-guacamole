@@ -8,7 +8,7 @@ import numpy as np
 from logger import setup_logging_config
 from maths import linear_regression, get_hash, hash_already_completed
 from schemas import HeatSchema
-from env import HOST, DATABASE, USERNAME, PASSWORD, MAX_RETRY_COUNT, RETRY_SLEEP_COUNT
+from env import MAX_RETRY_COUNT, RETRY_SLEEP_COUNT
 
 HOST = 'http://localhost:5432'
 DATABASE = 'models'
