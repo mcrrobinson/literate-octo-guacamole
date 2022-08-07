@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session, sessionmaker
 import databases
 from models.env import COUNTRIES, DATABASE_URL
 from models.schemas import AirSchema, HeatSchema
+from time import sleep
 
 try:
     database = databases.Database(DATABASE_URL)
@@ -92,7 +93,13 @@ def calculate_score(heat_prediction_score: dict, air_predictions: dict) -> float
 async def startup():
     """ On API startup, connect the SQL database.
     """
-    await database.connect()
+    while True:
+        try:
+            await database.connect()
+            break
+        except Exception as err:
+            print("Connection refused, restarting...", err)
+            sleep(5)
 
 
 @app.on_event("shutdown")
