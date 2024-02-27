@@ -205,8 +205,8 @@ app.get('/live/*', (req, res) => {
 const setup = async () => {
   const db = await dbPromise;
   await db.migrate();
-  app.listen('8081', () => {
-    console.log('Server is up on port 8081.');
+  app.listen('3000', '0.0.0.0', () => {
+    console.log('Server is up on port 3000.');
   });
 };
 

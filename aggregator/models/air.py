@@ -43,40 +43,21 @@ def update_database(update_values: list[AirSchema], session: Session) -> bool:
         result_length = len(result)
 
         if result_length == 0:
-            if model.co2_gradient and model.no_gradient:
-                session.add(model)
-            elif model.co2_gradient and not model.no_gradient:
-                new_record = AirSchema(
-                    country=model.country,
-                    co2_gradient=model.co2_gradient,
-                    co2_offset=model.co2_offset,
-                )
-                session.add(new_record)
-            elif model.no_gradient and not model.co2_gradient:
-                new_record = AirSchema(
-                    country=model.country,
-                    no_gradient=model.no_gradient,
-                    no_offset=model.no_offset,
-                )
-                session.add(new_record)
-            else:
-                log.error("Don't have either product... this shouldn't happen...")
+            session.add(model)
 
         elif result_length == 1:
             existing_record = result[0]
-            if model.co2_gradient and not model.no_gradient:
+
+            # Update co2_gradient and co2_offset if co2_gradient is provided
+            if model.co2_gradient is not None:
                 existing_record.co2_gradient = model.co2_gradient
                 existing_record.co2_offset = model.co2_offset
-            elif model.no_gradient and not model.co2_gradient:
+
+            # Update no_gradient and no_offset if no_gradient is provided
+            if model.no_gradient is not None:
                 existing_record.no_gradient = model.no_gradient
                 existing_record.no_offset = model.no_offset
-            elif model.co2_gradient and model.no_gradient:
-                existing_record.co2_gradient = model.co2_gradient
-                existing_record.co2_offset = model.co2_offset
-                existing_record.no_gradient = model.no_gradient
-                existing_record.no_offset = model.no_offset
-            else:
-                log.error("Don't have either product... this shouldn't happen...")
+
         else:
             log.error("This shouldn't happen.")
             continue

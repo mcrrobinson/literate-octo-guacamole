@@ -25,16 +25,16 @@ class AirSchema(Base):
     country = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     co2_gradient = sqlalchemy.Column(sqlalchemy.Float)
     co2_offset = sqlalchemy.Column(sqlalchemy.Float)
-    no_gradient = sqlalchemy.Column(sqlalchemy.Float)
-    no_offset = sqlalchemy.Column(sqlalchemy.Float)
+    no_gradient = sqlalchemy.Column(sqlalchemy.Float, nullable=True)
+    no_offset = sqlalchemy.Column(sqlalchemy.Float, nullable=True)
 
     def __init__(
         self,
         country: str,
         co2_gradient: float,
         co2_offset: float,
-        no_gradient: float,
-        no_offset: float,
+        no_gradient: float = None,
+        no_offset: float = None,
     ):
         self.country = country
         self.co2_gradient = co2_gradient

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:12-alpine
+    container_name: db 
+    restart: always
+    environment:
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=postgres
+    ports:
+    - 5432:5432
+    volumes:
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  livelong_api:
+    build:
+      context: .
+      dockerfile: Dockerfile.aggregator
+    container_name: livelong_api
+    # restart: always
+    ports:
+    - '8080:8080'
+
+  livelong_ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    command: node app.js --host 0.0.0.0 --port 3000
+    container_name: livelong_ui
+    restart: always
+    ports:
+    - '3000:3000'
+    depends_on:
+      - livelong_api
+      - db

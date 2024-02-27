@@ -97,9 +97,12 @@ async def startup():
         try:
             engine.connect()
 
+            print("Connected to the database...")
             # Create the tables if they don't exist
             AirSchema.__table__.create(bind=engine, checkfirst=True)
             HeatSchema.__table__.create(bind=engine, checkfirst=True)
+
+            print("Tables created...")
 
             # Make sure completed.txt exists
             with open("completed.txt", "a") as _:

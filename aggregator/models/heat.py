@@ -11,12 +11,6 @@ from models.schemas import HeatSchema
 from models.env import MAX_RETRY_COUNT, RETRY_SLEEP_COUNT
 from sqlalchemy.orm import Session
 
-HOST = "localhost"
-DATABASE = "models"
-USERNAME = "postgres"
-PASSWORD = "postgres"
-PORT = 5432
-
 log = setup_logging_config(__name__, "heat.log")
 
 try:
