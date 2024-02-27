@@ -1,18 +1,19 @@
 from datetime import datetime, timedelta
-from fastapi import Depends, FastAPI
+import shutil
+from fastapi import Depends, FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 import sqlalchemy
 from sqlalchemy.orm import Session, sessionmaker
-import databases
 from models.env import COUNTRIES, DATABASE_URL
 from models.schemas import AirSchema, HeatSchema
+from models.heat import generate_heat
+from models.air import generate_air
 from time import sleep
 
 try:
-    database = databases.Database(DATABASE_URL)
     engine = sqlalchemy.create_engine(DATABASE_URL)
-    session_local = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine)
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 except Exception as err:
     print("Unable to connect databse")
@@ -47,7 +48,7 @@ app.add_middleware(
 
 
 def query(session, schema, country) -> classmethod:
-    """ Queries the database for the input class schema and country.
+    """Queries the database for the input class schema and country.
 
     Returns:
         classmethod: Returns a class based on the input class in schema.
@@ -64,7 +65,7 @@ def calculate_score(heat_prediction_score: dict, air_predictions: dict) -> float
     Args:
         heat_prediction_score (dict): Contains the min, avg and max heat
             scores based on what's survivable to the human body.
-        air_predictions (dict): Contains the carbon dioxide and nitrous oxide 
+        air_predictions (dict): Contains the carbon dioxide and nitrous oxide
             scores based on what's healthy for the human body.
 
     Returns:
@@ -91,11 +92,19 @@ def calculate_score(heat_prediction_score: dict, air_predictions: dict) -> float
 
 @app.on_event("startup")
 async def startup():
-    """ On API startup, connect the SQL database.
-    """
+    """On API startup, connect the SQL database."""
     while True:
         try:
-            await database.connect()
+            engine.connect()
+
+            # Create the tables if they don't exist
+            AirSchema.__table__.create(bind=engine, checkfirst=True)
+            HeatSchema.__table__.create(bind=engine, checkfirst=True)
+
+            # Make sure completed.txt exists
+            with open("completed.txt", "a") as _:
+                pass
+
             break
         except Exception as err:
             print("Connection refused, restarting...", err)
@@ -104,18 +113,18 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    """ On API shutdown, cleanly disconnect from the database.
-    """
-    await database.disconnect()
+    """On API shutdown, cleanly disconnect from the database."""
+    engine.dispose()
 
 
-@app.get('/score')
+@app.get("/score")
 async def score(
-        country: str = None,
-        day: int = None,
-        month: int = None,
-        year: int = None,
-        session: Session = Depends(get_session)):
+    country: str = None,
+    day: int = None,
+    month: int = None,
+    year: int = None,
+    session: Session = Depends(get_session),
+):
     """Returns the score for the country and date inputted.
 
     Args:
@@ -158,13 +167,15 @@ async def score(
         if country not in COUNTRIES:
             return {"error": "Country doesn't match schema."}
 
-        db_air_result = session.query(AirSchema).filter(
-            AirSchema.country == country).first()
+        db_air_result = (
+            session.query(AirSchema).filter(AirSchema.country == country).first()
+        )
         if db_air_result:
             air_prediction_score = db_air_result.predict(prediction_date)
 
-        db_heat_result = session.query(HeatSchema).filter(
-            HeatSchema.country == country).first()
+        db_heat_result = (
+            session.query(HeatSchema).filter(HeatSchema.country == country).first()
+        )
         if db_heat_result:
             heat_prediction_score = db_heat_result.predict(prediction_date)
 
@@ -175,10 +186,8 @@ async def score(
 
     # NOT EFFICIENT. MUST BE A BETTER WAY
     country_scores = {}
-    countries_from_air_table = [
-        row.country for row in session.query(AirSchema).all()]
-    countries_from_heat_table = [
-        row.country for row in session.query(HeatSchema).all()]
+    countries_from_air_table = [row.country for row in session.query(AirSchema).all()]
+    countries_from_heat_table = [row.country for row in session.query(HeatSchema).all()]
 
     for iso3 in countries_from_air_table:
         if iso3 in countries_from_heat_table:
@@ -186,12 +195,9 @@ async def score(
             db_heat_result = query(session, HeatSchema, iso3)
 
             country_scores[iso3] = calculate_score(
-                db_heat_result.predict(prediction_date) if
-                db_heat_result else
-                None,
-                db_air_result.predict(prediction_date) if
-                db_air_result else
-                None)
+                db_heat_result.predict(prediction_date) if db_heat_result else None,
+                db_air_result.predict(prediction_date) if db_air_result else None,
+            )
 
         elif iso3 not in countries_from_heat_table:
             db_air_result = query(session, AirSchema, iso3)
@@ -202,7 +208,8 @@ async def score(
                 continue
 
             country_scores[iso3] = calculate_score(
-                None, db_air_result.predict(prediction_date))
+                None, db_air_result.predict(prediction_date)
+            )
 
     for iso3 in countries_from_heat_table:
 
@@ -218,19 +225,21 @@ async def score(
             continue
 
         country_scores[iso3] = calculate_score(
-            db_heat_result.predict(prediction_date), None)
+            db_heat_result.predict(prediction_date), None
+        )
 
     return country_scores
 
 
-@app.get('/air_pollution_prediction')
+@app.get("/air_pollution_prediction")
 async def air_pollution_prediction(
-        country: str = None,
-        day: int = None,
-        month: int = None,
-        year: int = None,
-        session: Session = Depends(get_session)):
-    """ Returns a score from 0 to 1 for air quality for a country.
+    country: str = None,
+    day: int = None,
+    month: int = None,
+    year: int = None,
+    session: Session = Depends(get_session),
+):
+    """Returns a score from 0 to 1 for air quality for a country.
 
     Args:
         country (str, optional): A user can request a country input, if this is
@@ -238,11 +247,11 @@ async def air_pollution_prediction(
             defaults to return every country.
         day (int, optional): A user can specify a specific day to predict.
             Defaults to None.
-        month (int, optional): A user can specify a specific month to predict. 
+        month (int, optional): A user can specify a specific month to predict.
             Defaults to None.
-        year (int, optional): A user can specify a specific year to predict. 
+        year (int, optional): A user can specify a specific year to predict.
             Defaults to None.
-        session (Session, optional): Session yield to connect to the database. 
+        session (Session, optional): Session yield to connect to the database.
             Defaults to Depends(get_session).
 
     Returns:
@@ -282,18 +291,21 @@ async def air_pollution_prediction(
         # Was null, entered country didn't fit in the database.
         return {"error": "Country doesn't exist in the dataset"}
 
-    return {item.country: item.predict(prediction_date) for item in session.query(
-            AirSchema).all() if item is not None}
+    return {
+        item.country: item.predict(prediction_date)
+        for item in session.query(AirSchema).all()
+        if item is not None
+    }
 
 
-@app.get('/heat_prediction')
+@app.get("/heat_prediction")
 async def heat_prediction(
-        country: str = None,
-        day: int = None,
-        month: int = None,
-        year: int = None,
-        session: Session = Depends(get_session)):
-
+    country: str = None,
+    day: int = None,
+    month: int = None,
+    year: int = None,
+    session: Session = Depends(get_session),
+):
     """Housing risk returns the current predictions on the input location and
     date
 
@@ -335,8 +347,9 @@ async def heat_prediction(
         if country not in COUNTRIES:
             return {"error": "Country doesn't match schema."}
 
-        iso3_heat_result = session.query(HeatSchema).filter(
-            HeatSchema.country == country).first()
+        iso3_heat_result = (
+            session.query(HeatSchema).filter(HeatSchema.country == country).first()
+        )
         if iso3_heat_result:
             return iso3_heat_result.predict(prediction_date)
 
@@ -344,5 +357,60 @@ async def heat_prediction(
         # database yet.
         return {"error": "Country doesn't exist in the dataset"}
 
-    return {item.country: item.predict(prediction_date) for item in session.query(
-        HeatSchema).all() if item is not None}
+    return {
+        item.country: item.predict(prediction_date)
+        for item in session.query(HeatSchema).all()
+        if item is not None
+    }
+
+
+@app.get("/upl/air")
+async def main():
+    content = """
+<body>
+<form action="/upl/air/file" enctype="multipart/form-data" method="post">
+<input name="file" type="file">
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
+
+
+@app.get("/upl/heat")
+async def main():
+    content = """
+<body>
+<form action="/upl/heat/file" enctype="multipart/form-data" method="post">
+<input name="file" type="file">
+<input type="submit">
+</form>
+</body>
+    """
+    return HTMLResponse(content=content)
+
+
+@app.post("/upl/air/file")
+async def create_upload_file(
+    file: UploadFile = File(...), session: Session = Depends(get_session)
+):
+    # You can now save the file, process it, etc. For example, you can save it to disk with:
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    generate_air(file.filename, session)
+    # Return a message or any information you want
+    return {"filename": file.filename}
+
+
+@app.post("/upl/heat/file")
+async def create_upload_file(
+    file: UploadFile = File(...), session: Session = Depends(get_session)
+):
+    # You can now save the file, process it, etc. For example, you can save it to disk with:
+    with open(file.filename, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    generate_heat(file.filename, session)
+    # Return a message or any information you want
+    return {"filename": file.filename}
